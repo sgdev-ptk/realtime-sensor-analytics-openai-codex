@@ -1,0 +1,109 @@
+<div class="dashboard">
+  <header class="header">
+    <div>
+      <h1>Real-Time Sensor Analytics</h1>
+      <p>Streaming 1,000 readings per second with 24-hour retention</p>
+    </div>
+    <div class="status-pill">Live</div>
+  </header>
+
+  <section class="stats-grid" *ngIf="stats$ | async as stats">
+    <div class="card stat-card">
+      <span class="label">Average Value</span>
+      <span class="value">{{ stats.averageValue | number: '1.0-2' }}</span>
+    </div>
+    <div class="card stat-card">
+      <span class="label">Value Range</span>
+      <span class="value">{{ stats.minValue | number: '1.0-2' }} – {{ stats.maxValue | number: '1.0-2' }}</span>
+    </div>
+    <div class="card stat-card">
+      <span class="label">Std Dev</span>
+      <span class="value">{{ stats.standardDeviation | number: '1.0-2' }}</span>
+    </div>
+    <div class="card stat-card">
+      <span class="label">Temperature / Humidity</span>
+      <span class="value">{{ stats.averageTemperature | number: '1.0-2' }} °C / {{ stats.averageHumidity | number: '1.0-2' }}%</span>
+    </div>
+    <div class="card stat-card">
+      <span class="label">Window Size</span>
+      <span class="value">{{ stats.totalReadings | number }} samples</span>
+      <small>Window: {{ stats.windowStart | date: 'shortTime' }} – {{ stats.windowEnd | date: 'shortTime' }}</small>
+    </div>
+  </section>
+
+  <section class="card chart-card">
+    <div class="section-header">
+      <div>
+        <h2>Live Sensor Values</h2>
+        <p>Average sensor value grouped per second across the fleet</p>
+      </div>
+    </div>
+    <div class="chart-wrapper">
+      <canvas
+        baseChart
+        [data]="chartData"
+        [options]="chartOptions"
+        [legend]="true"
+        chartType="line"
+      ></canvas>
+    </div>
+  </section>
+
+  <div class="content-grid">
+    <section class="card alerts">
+      <div class="section-header">
+        <h2>Live Alerts</h2>
+        <p>Threshold breach notifications</p>
+      </div>
+      <div class="alerts-list" *ngIf="(alerts$ | async) as alerts; else emptyAlerts">
+        <div
+          class="alert"
+          *ngFor="let alert of alerts; trackBy: trackByAlert"
+        >
+          <div class="alert-header">
+            <span class="badge">{{ alert.severity | uppercase }}</span>
+            <span class="time">{{ alert.timestamp | date: 'shortTime' }}</span>
+          </div>
+          <div class="alert-body">
+            <strong>{{ alert.sensorId }}</strong>
+            <span>{{ alert.message }}</span>
+            <span class="metric">Value: {{ alert.value | number: '1.0-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card readings">
+      <div class="section-header">
+        <h2>Recent Readings</h2>
+        <p>Latest sensor samples across all devices</p>
+      </div>
+      <div class="table-wrapper" *ngIf="(readings$ | async) as readings">
+        <table>
+          <thead>
+            <tr>
+              <th>Sensor</th>
+              <th>Timestamp</th>
+              <th>Value</th>
+              <th>Temp (°C)</th>
+              <th>Humidity (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reading of readings.slice(-20); trackBy: trackByReading">
+              <td>{{ reading.sensorId }}</td>
+              <td>{{ reading.timestamp | date: 'mediumTime' }}</td>
+              <td>{{ reading.value | number: '1.0-2' }}</td>
+              <td>{{ reading.temperature | number: '1.0-1' }}</td>
+              <td>{{ reading.humidity | number: '1.0-1' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<ng-template #emptyAlerts>
+  <p class="empty-state">No alerts in the last few minutes. All systems nominal.</p>
+</ng-template>
