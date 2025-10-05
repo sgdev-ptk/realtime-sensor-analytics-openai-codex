@@ -151,7 +151,7 @@ export class SensorDataService implements OnDestroy {
   private updateChart(readings: SensorReading[]): void {
     readings.forEach((reading) => {
       const timestamp = new Date(reading.timestamp);
-      const key = timestamp.toISOString().substring(0, 19);
+      const key = Math.floor(timestamp.getTime() / 1000).toString();
       let bucket = this.chartBuckets.get(key);
       if (!bucket) {
         bucket = { key, timestamp, sum: 0, count: 0 };
