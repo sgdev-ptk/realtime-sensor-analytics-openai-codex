@@ -10,7 +10,7 @@ namespace SensorAnalytics.Api.Services;
 public class SensorSimulationService : BackgroundService
 {
     private const int SensorsPerBatch = 10;
-    private const int ReadingsPerSecond = 1000;
+    public const int ReadingsPerSecond = 1_000;
     private readonly ILogger<SensorSimulationService> _logger;
     private readonly SensorDataStore _dataStore;
     private readonly IHubContext<SensorHub> _hubContext;

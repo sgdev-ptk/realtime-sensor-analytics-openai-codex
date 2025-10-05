@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using SensorAnalytics.Api.Models;
 
@@ -20,10 +21,17 @@ public class SensorDataStore
     private double _minValue = double.MaxValue;
     private double _maxValue = double.MinValue;
 
-    public SensorDataStore(TimeSpan? retention = null, int maxDataPoints = 100_000, int maxAlertHistory = 200)
+    public SensorDataStore(
+        TimeSpan? retention = null,
+        int? maxDataPoints = null,
+        int maxAlertHistory = 200,
+        double expectedIngestionRatePerSecond = 1_000)
     {
         _retention = retention ?? TimeSpan.FromHours(24);
-        _maxDataPoints = maxDataPoints;
+        var calculatedCapacity = CalculateCapacity(_retention, expectedIngestionRatePerSecond);
+        _maxDataPoints = maxDataPoints.HasValue
+            ? Math.Max(maxDataPoints.Value, calculatedCapacity)
+            : calculatedCapacity;
         _maxAlertHistory = maxAlertHistory;
     }
 
@@ -143,5 +151,26 @@ public class SensorDataStore
             _minValue = _readings.Min(r => r.Value);
             _maxValue = _readings.Max(r => r.Value);
         }
+    }
+
+    private static int CalculateCapacity(TimeSpan retention, double expectedIngestionRatePerSecond)
+    {
+        if (retention <= TimeSpan.Zero)
+        {
+            return 1;
+        }
+
+        if (expectedIngestionRatePerSecond <= 0)
+        {
+            return int.MaxValue;
+        }
+
+        var required = (long)Math.Ceiling(retention.TotalSeconds * expectedIngestionRatePerSecond);
+        if (required <= 0)
+        {
+            return 1;
+        }
+
+        return required > int.MaxValue ? int.MaxValue : (int)required;
     }
 }

@@ -17,7 +17,7 @@ This repository contains a proof-of-concept implementation of a real-time sensor
 ## Backend Overview (`SensorAnalytics.Api`)
 
 - `SensorSimulationService` generates synthetic sensor data, detects anomalies, and broadcasts batches to connected clients through SignalR.
-- `SensorDataStore` maintains an in-memory buffer capable of handling 100,000 data points while enforcing a 24-hour retention window and tracking aggregate statistics.
+- `SensorDataStore` maintains an in-memory buffer sized to preserve the full 24-hour retention window based on the expected ingestion rate while tracking aggregate statistics.
 - `SensorHub` (SignalR) and `ReadingsController` expose real-time streams and REST endpoints for statistics, recent readings, and alerts.
 
 ### Running the API

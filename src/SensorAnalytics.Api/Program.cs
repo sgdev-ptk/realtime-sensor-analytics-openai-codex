@@ -18,7 +18,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddSingleton<SensorDataStore>();
+builder.Services.AddSingleton(provider => new SensorDataStore(
+    expectedIngestionRatePerSecond: SensorSimulationService.ReadingsPerSecond));
 builder.Services.AddHostedService<SensorSimulationService>();
 
 var app = builder.Build();
