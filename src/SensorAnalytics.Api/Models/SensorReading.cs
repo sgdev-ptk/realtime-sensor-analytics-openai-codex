@@ -10,6 +10,4 @@ public record SensorReading(
     double Temperature,
     double Humidity)
 {
-    [JsonIgnore]
-    public bool IsAnomaly { get; init; }
 }
